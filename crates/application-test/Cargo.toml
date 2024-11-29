@@ -1,0 +1,11 @@
+[package]
+name = "application-test"
+version = "0.1.0"
+edition = "2024"
+
+[target.'cfg(target_arch = "arm")'.dependencies]
+pico-test = { path = "../pico-test" }
+cortex-m-rt = "0.7"
+
+[target.'cfg(not(target_arch = "arm"))'.dependencies]
+linux-test = { path = "../linux-test" }
