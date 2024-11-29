@@ -28,19 +28,26 @@
       };
       inherit (pkgs) lib;
 
-      # rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-      rustToolchain = pkgs.pkgsBuildHost.rust-bin.nightly.latest.default.override {
-        targets = ["thumbv6m-none-eabi"];
-      };
+      rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
       craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
       commonArgs = {
         src = lib.cleanSourceWith {
-          src = ./.;
+          src = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./.cargo/config.toml
+              ./Cargo.toml
+              ./Cargo.lock
+              ./memory.x
+              (craneLib.fileset.commonCargoSources ./crates/pico-test)
+              (craneLib.fileset.commonCargoSources ./crates/application-test)
+            ];
+          };
           filter = path: type: (craneLib.filterCargoSources path type) || (builtins.baseNameOf path == "memory.x");
         };
-        cargoExtraArgs = "-p application-test --target thumbv6m-none-eabi";
+        cargoExtraArgs = "--target thumbv6m-none-eabi";
         doCheck = false;
         buildInputs = with pkgs; [
           flip-link
