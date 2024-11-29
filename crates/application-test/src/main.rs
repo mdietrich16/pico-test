@@ -2,7 +2,7 @@
 #![cfg_attr(target_arch = "arm", no_main)]
 
 #[cfg(target_arch = "arm")]
-use pico_test::{DroneBackend, HwBackend};
+use embedded_test::{DroneBackend, HwBackend};
 
 #[cfg(not(target_arch = "arm"))]
 use linux_test::{DroneBackend, SimBackend};

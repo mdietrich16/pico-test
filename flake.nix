@@ -33,46 +33,42 @@
       craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
       commonArgs = {
-        src = lib.cleanSourceWith {
-          src = lib.fileset.toSource {
-            root = ./.;
-            fileset = lib.fileset.unions [
-              ./.cargo/config.toml
-              ./Cargo.toml
-              ./Cargo.lock
-              ./memory.x
-              (craneLib.fileset.commonCargoSources ./crates/pico-test)
-              (craneLib.fileset.commonCargoSources ./crates/application-test)
-            ];
-          };
-          filter = path: type: (craneLib.filterCargoSources path type) || (builtins.baseNameOf path == "memory.x");
-        };
-        cargoExtraArgs = "--target thumbv6m-none-eabi";
+        src = craneLib.cleanCargoSource ./.;
         doCheck = false;
-        buildInputs = with pkgs; [
-          flip-link
-        ];
       };
 
+      desktopCargoArtifacts = craneLib.buildDepsOnly commonArgs;
+
+      embeddedArgs =
+        commonArgs
+        // {
+          src = lib.cleanSourceWith {
+            src = ./.;
+            filter = path: type: (craneLib.filterCargoSources path type) || (builtins.baseNameOf path == "memory.x");
+          };
+          cargoExtraArgs = "--target thumbv6m-none-eabi";
+          buildInputs = with pkgs; [
+            flip-link
+          ];
+        };
+
       # Build artifacts
-      cargoArtifacts = craneLib.buildDepsOnly (commonArgs
+      embeddedCargoArtifacts = craneLib.buildDepsOnly (embeddedArgs
         // {
           extraDummyScript = ''
             cp -a ${./memory.x} $out/memory.x
-            rm -rf $out/**/src/bin/crane-dummy-*
+            (shopt -s globstar; rm -rf $out/**/src/bin/crane-dummy-*)
           '';
         });
 
-      firmware = craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-        });
+      embedded = craneLib.buildPackage (embeddedArgs // {cargoArtifacts = embeddedCargoArtifacts;});
+      desktop = craneLib.buildPackage (commonArgs // {cargoArtifacts = desktopCargoArtifacts;});
     in {
       packages = {
-        inherit firmware;
+        inherit embedded desktop;
       };
       devShells.default = craneLib.devShell {
-        inputsFrom = [self.packages.${system}.firmware];
+        inputsFrom = [self.packages.${system}.embedded self.packages.${system}.desktop];
         buildInputs = with pkgs; [
           rust-analyzer
           probe-rs-tools # Flashing and debugging

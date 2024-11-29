@@ -1,5 +1,5 @@
 [package]
-name = "pico-test"
+name = "embedded-test"
 version = "0.1.0"
 edition = "2021"
 publish = false

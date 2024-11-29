@@ -7,8 +7,8 @@ name = "application-test"
 version = "0.1.0"
 dependencies = [
  "cortex-m-rt",
+ "embedded-test",
  "linux-test",
- "pico-test",
 ]
 
 [[package]]
@@ -202,6 +202,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
+name = "embedded-test"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "embedded-hal 1.0.0",
+ "panic-probe",
+ "rp-pico",
+]
+
+[[package]]
 name = "frunk"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -337,19 +350,6 @@ name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
-
-[[package]]
-name = "pico-test"
-version = "0.1.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "defmt",
- "defmt-rtt",
- "embedded-hal 1.0.0",
- "panic-probe",
- "rp-pico",
-]
 
 [[package]]
 name = "pio"
